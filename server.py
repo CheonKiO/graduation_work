@@ -1,9 +1,13 @@
-import json
-from langchain_ollama import OllamaLLM
-from fastapi import FastAPI, File, UploadFile
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, File, UploadFile, Request, Form
+from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from PIL import Image
 import io
+'''
+import json
+from langchain_ollama import OllamaLLM
+
 import torch
 import torch.nn as nn
 from torchvision import transforms, models
@@ -132,10 +136,14 @@ print_mapping = {
     20: 'snake-skin',
     21: 'unknown',
 }
-
+'''
 # FastAPI 앱 인스턴스 생성
 app = FastAPI()
 
+# static 및 templates 디렉토리 설정
+app.mount("/static", StaticFiles(directory="static"), name="static")
+templates = Jinja2Templates(directory="screen")
+'''
 # Ollama LLM 설정 (Llama3.2 모델 사용 예시)
 ollama_llm = OllamaLLM(model="llama3.2")
 
@@ -313,7 +321,7 @@ class UppermaterialModel(nn.Module):
             'material': material_output
         }
 
-# UpperCategoryCategoryModel 정의
+# 모델 정의 (학습한 모델 클래스와 동일하게 유지)
 class UpperCategoryCategoryModel(nn.Module):
     def __init__(self, num_upper_categories, num_categories):
         super(UpperCategoryCategoryModel, self).__init__()
@@ -400,7 +408,20 @@ def predict_image(image: Image.Image):
         "material": material_pred,
         "color": color_pred
     }
-
+'''
+# 홈 화면 엔드포인트
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
+# 로그인 엔드포인트
+@app.post("/login/")
+async def login(username: str = Form(...), password: str = Form(...)):
+    # 여기에 로그인 로직 추가 (예: 사용자 인증)
+    if username == "test" and password == "password":  # 예시 조건
+        return {"message": "로그인 성공"}
+    else:
+        return {"message": "로그인 실패"}
+'''
 # 이미지 업로드 엔드포인트 (POST 요청)
 @app.post("/predict/")
 async def predict(file: UploadFile = File(...)):
@@ -411,3 +432,4 @@ async def predict(file: UploadFile = File(...)):
     
     predictions = predict_image(image)
     return {"predictions": predictions}
+'''
